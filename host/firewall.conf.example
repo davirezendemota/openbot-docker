@@ -1,0 +1,7 @@
+# Bridge interfaces for isolated OpenBot networks (space-separated in systemd env).
+# Example: OPENBOT_FIREWALL_BRIDGES="br-openbot-1 br-openbot-2"
+OPENBOT_FIREWALL_BRIDGES="br-openbot-1"
+
+# Optional Tailscale client IPs (/32) allowed for UDP egress (WebRTC direct path).
+# Example: OPENBOT_FIREWALL_ALLOW_UDP="100.64.0.10/32 100.64.0.11/32"
+OPENBOT_FIREWALL_ALLOW_UDP=""

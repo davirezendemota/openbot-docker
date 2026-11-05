@@ -1,0 +1,52 @@
+# Second isolated instance (upstream image, no Tailscale).
+# cp .env.example .env  →  docker compose up -d
+# Login: docker compose exec openbot openbot login
+
+name: openbot-plain
+
+services:
+  openbot:
+    image: ${OPENBOT_IMAGE:-ghcr.io/nightly-labs/openbot:0.57.0@sha256:84aadc0ce11beeadabfa1f17e4cc4d56bc27ed45f3ff9f3dbf7a6b3fe03471ef}
+    container_name: ${OPENBOT_CONTAINER_NAME:-openbot-node-2}
+    restart: unless-stopped
+    hostname: ${OPENBOT_HOSTNAME:-openbot-node-2}
+    networks:
+      - isolated
+    dns:
+      - 1.1.1.1
+      - 9.9.9.9
+    security_opt:
+      - seccomp=../../seccomp.json
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_CHROOT
+      - SETUID
+      - SETGID
+    shm_size: 1g
+    stop_grace_period: 60s
+    mem_limit: ${OPENBOT_MEM_LIMIT:-6g}
+    cpus: ${OPENBOT_CPUS:-4}
+    pids_limit: 2048
+    volumes:
+      - data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  isolated:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: ${OPENBOT_BRIDGE_NAME:-br-openbot-2}
+      com.docker.network.bridge.enable_icc: "false"
+    ipam:
+      config:
+        - subnet: 10.88.1.0/24
+
+volumes:
+  data:
+    name: ${OPENBOT_VOLUME_NAME:-openbot_plain_data}
