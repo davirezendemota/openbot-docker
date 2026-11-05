@@ -1,10 +1,8 @@
-<table align="center">
-  <tr>
-    <td align="center" valign="middle"><a href="https://openbot.run"><img src="docs/assets/openbot.png" alt="OpenBot" width="88" height="88"></a></td>
-    <td align="center" valign="middle"><strong>×</strong></td>
-    <td align="center" valign="middle"><a href="https://www.docker.com/"><img src="docs/assets/docker.svg" alt="Docker" width="88" height="88"></a></td>
-  </tr>
-</table>
+<p align="center">
+  <a href="https://openbot.run"><img src="docs/assets/openbot.png" alt="OpenBot" width="88" height="88" align="middle"></a>
+  &nbsp;&nbsp;<strong>×</strong>&nbsp;&nbsp;
+  <a href="https://www.docker.com/"><img src="docs/assets/docker.svg" alt="Docker" width="88" height="88" align="middle"></a>
+</p>
 
 # openbot-docker
 
