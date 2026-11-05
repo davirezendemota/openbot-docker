@@ -17,8 +17,10 @@ Public repository: Docker Compose + host firewall for **isolated self-hosted Ope
         |                                    ^
         | WebRTC / account                   |
         v                                    |
-[ tailnet optional — stacks/tailscale/ ]   [ container: OpenBot or tailscaled+OpenBot ]
-        |                             volume: /data
+[ optional: stacks/tailscale/ ]       [ container: OpenBot (+ optional tailscaled) ]
+        |                                    |
+        |                                    v
+        |                              volume: /data
         v
 [ host: docker bridge br-openbot-N ]
         |
