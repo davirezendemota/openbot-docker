@@ -23,6 +23,7 @@ Reload after edits:
 ```bash
 sudo systemctl restart openbot-firewall
 sudo /usr/local/lib/openbot-docker/firewall.sh status
+sudo /usr/local/lib/openbot-docker/firewall.sh check   # must print OK
 ```
 
 ## 2. Environment
@@ -39,6 +40,7 @@ cp .env.example .env
 | `OPENBOT_CONTAINER_NAME` | Docker container name |
 | `OPENBOT_HOSTNAME` | Hostname inside the container |
 | `OPENBOT_BRIDGE_NAME` | Bridge interface on the host |
+| `OPENBOT_SUBNET` | Bridge subnet (default `10.88.0.0/24`); change if it overlaps your LAN |
 | `OPENBOT_MEM_LIMIT` / `OPENBOT_CPUS` | Resource limits |
 
 Never commit `.env`.
@@ -61,7 +63,7 @@ docker compose exec openbot openbot mobile-connect
 ```bash
 docker compose ps
 docker compose exec -T openbot curl -sI -m5 https://openbot.run | head -1
-docker compose exec -T openbot curl -s -m3 -o /dev/null -w "%{http_code}\n" http://10.88.0.1 || echo blocked
+docker compose exec -T openbot curl -s -m3 -o /dev/null -w "%{http_code}\n" http://<LAN-or-gateway-IP> || echo blocked
 sudo journalctl -k -g openbot-drop --since -10min
 ```
 
@@ -70,8 +72,8 @@ Replace probe URLs with addresses on your LAN; they should fail or time out whil
 ## 5. Another generic instance
 
 1. Copy `stacks/plain` to `stacks/<name>/`.
-2. Change in `.env`: container name, hostname, bridge name, volume name.
-3. Change in `compose.yaml`: `subnet` under `networks.isolated.ipam`.
+2. Change in `.env`: container name, hostname, bridge name, volume name, subnet.
+3. Set a unique `OPENBOT_SUBNET` in `.env` (default in `compose.yaml` is `10.88.1.0/24`).
 4. Add the new bridge to `OPENBOT_FIREWALL_BRIDGES`.
 5. `docker compose up -d` from the new directory and run `openbot login`.
 

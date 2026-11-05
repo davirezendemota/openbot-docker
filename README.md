@@ -10,6 +10,29 @@ Docker Compose and host firewall recipes to run one or more **isolated** [OpenBo
 
 Upstream license: PolyForm Noncommercial 1.0.0 (personal use OK; commercial use requires a license from the OpenBot authors).
 
+## Quick start
+
+Requires a **Linux** host (iptables) with Docker Engine + Compose v2. Docker Desktop (macOS/Windows) cannot enforce the host firewall, so isolation would be incomplete.
+
+```bash
+# 1. Host firewall (once) — see SETUP.md for the full steps
+sudo install -d /etc/openbot-docker /usr/local/lib/openbot-docker
+sudo cp host/firewall.conf.example /etc/openbot-docker/firewall.conf
+sudo install -m 755 host/firewall.sh /usr/local/lib/openbot-docker/firewall.sh
+sudo install -m 644 host/openbot-firewall.service /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now openbot-firewall
+
+# 2. Start OpenBot
+cp .env.example .env
+docker compose up -d
+docker compose exec openbot openbot login
+
+# 3. Confirm isolation is active
+sudo /usr/local/lib/openbot-docker/firewall.sh check
+```
+
+Do not skip step 1: without it the container can reach your LAN.
+
 ## Layout
 
 | Path | Purpose |
@@ -52,7 +75,7 @@ If the OpenBot app on a Tailscale client is slow (TURN relay), you may add that 
 Replace probe URLs with addresses on your LAN or tailnet:
 
 ```bash
-docker compose exec -T openbot curl -s -m3 -o /dev/null -w "%{http_code}\n" http://10.88.0.1 || echo blocked
+docker compose exec -T openbot curl -s -m3 -o /dev/null -w "%{http_code}\n" http://<LAN-or-gateway-IP> || echo blocked
 docker compose exec -T openbot curl -sI -m5 https://openbot.run | head -1
 sudo journalctl -k -g openbot-drop --since -10min
 ```

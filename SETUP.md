@@ -18,8 +18,11 @@ sudo systemctl daemon-reload && sudo systemctl enable --now openbot-firewall
 sudo /usr/local/lib/openbot-docker/firewall.sh status
 ```
 
+> **Do not skip this.** Without the firewall the container can reach your LAN. After setup, `sudo /usr/local/lib/openbot-docker/firewall.sh check` must print `OK`; the bridge names must match `OPENBOT_BRIDGE_NAME` in each `.env`.
+
 Requirements:
 
+- Linux host with `iptables` (Docker Desktop on macOS/Windows is not supported)
 - Linux with Docker Engine and Compose v2
 - Enough RAM for OpenBot (several GiB per active agent; set `OPENBOT_MEM_LIMIT` in `.env`)
 - Outbound internet from the container (account service, providers, TURN)
@@ -32,8 +35,10 @@ Start here. Root **`compose.yaml`** runs the pinned **upstream** OpenBot image w
 
 ```bash
 cp .env.example .env
+# if 10.88.0.0/24 overlaps your network, change OPENBOT_SUBNET in .env
 docker compose up -d
 docker compose exec openbot openbot login
+sudo /usr/local/lib/openbot-docker/firewall.sh check
 ```
 
 ## Optional: Tailscale inside the container
