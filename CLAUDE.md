@@ -2,6 +2,8 @@
 
 Public repository: Docker Compose + host firewall for **isolated self-hosted OpenBot** containers. Not tied to any other monorepo or deployment; clone and run on a Linux host with Docker.
 
+**Installation:** [SETUP.md](SETUP.md) (entry point) → [docs/setup-tailscale.md](docs/setup-tailscale.md) or [docs/setup-generic.md](docs/setup-generic.md).
+
 ## What this repo is
 
 - **Goal:** Run OpenBot Remote hosts where the container is the trust boundary (upstream model).
@@ -49,9 +51,12 @@ Public repository: Docker Compose + host firewall for **isolated self-hosted Ope
 - Prefer minimal diffs; do not add unrelated services to compose.
 - When adding a new stack under `stacks/`, document unique bridge, subnet, volume name, and firewall line in that stack’s README.
 - Do not weaken isolation (`privileged`, `seccomp=unconfined`, host bind mounts, `docker.sock`) unless the user explicitly accepts the risk in writing.
-- Test suggestions: `docker compose config`, firewall `status`, optional curl probes from inside the container (see root README).
+- Test suggestions: `docker compose config`, firewall `status`, optional curl probes from inside the container (see [SETUP.md](SETUP.md) and [README.md](README.md)).
 
 ## Links
 
+- [SETUP.md](SETUP.md) — shared firewall prerequisites and links to setup guides
+- [docs/setup-tailscale.md](docs/setup-tailscale.md) — Tailscale-in-container stack
+- [docs/setup-generic.md](docs/setup-generic.md) — upstream image stack (`stacks/plain/`)
 - OpenBot upstream Docker docs: https://github.com/nightly-labs/openbot (`docs/docker.md`)
-- This repo README: installation, validation, multi-instance checklist
+- [README.md](README.md) — layout, isolation model, upgrade, multi-instance checklist

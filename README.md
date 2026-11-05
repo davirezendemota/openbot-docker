@@ -13,49 +13,16 @@ Upstream license: PolyForm Noncommercial 1.0.0 (personal use OK; commercial use 
 | `seccomp.json` | OpenBot upstream seccomp profile (Electron sandbox) |
 | `host/` | iptables egress filter for Docker bridge interfaces |
 | `stacks/plain/` | Optional second instance using the upstream image only (no Tailscale) |
+| `SETUP.md` | Setup entry point (host firewall + links to guides) |
+| `docs/setup-tailscale.md` | Tailscale-in-container installation |
+| `docs/setup-generic.md` | Upstream-image installation (`stacks/plain/`) |
 
-## Quick start (Tailscale stack)
+## Setup
 
-1. Copy env and set a Tailscale auth key (tagged key matching your ACL):
+Follow **[SETUP.md](SETUP.md)** for host firewall prerequisites, then:
 
-```bash
-cp .env.example .env
-# edit OPENBOT_TAILSCALE_AUTHKEY, TS_HOSTNAME, OPENBOT_BRIDGE_NAME
-```
-
-2. Install host firewall (Linux, root). List every OpenBot bridge you will use:
-
-```bash
-sudo install -d /etc/openbot-docker
-sudo cp host/firewall.conf.example /etc/openbot-docker/firewall.conf
-# edit OPENBOT_FIREWALL_BRIDGES and optional OPENBOT_FIREWALL_ALLOW_UDP
-sudo install -d /usr/local/lib/openbot-docker
-sudo install -m 755 host/firewall.sh /usr/local/lib/openbot-docker/firewall.sh
-sudo install -m 644 host/openbot-firewall.service /etc/systemd/system/
-sudo systemctl daemon-reload && sudo systemctl enable --now openbot-firewall
-sudo /usr/local/lib/openbot-docker/firewall.sh status
-```
-
-3. Start OpenBot:
-
-```bash
-docker compose up -d --build
-docker compose exec openbot tailscale status
-docker compose exec openbot openbot login
-```
-
-The server appears in the OpenBot desktop or web app as a Remote host. Mobile pairing: `docker compose exec openbot openbot mobile-connect`.
-
-## Plain upstream instance (no Tailscale)
-
-```bash
-cd stacks/plain
-cp .env.example .env
-docker compose up -d
-docker compose exec openbot openbot login
-```
-
-Add `br-openbot-2` (or your bridge name) to `OPENBOT_FIREWALL_BRIDGES` before starting traffic.
+- **[docs/setup-tailscale.md](docs/setup-tailscale.md)** — root `compose.yaml` + Tailscale
+- **[docs/setup-generic.md](docs/setup-generic.md)** — generic upstream stack
 
 ## Isolation model
 
