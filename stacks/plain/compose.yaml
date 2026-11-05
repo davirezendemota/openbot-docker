@@ -45,7 +45,7 @@ networks:
       com.docker.network.bridge.enable_icc: "false"
     ipam:
       config:
-        - subnet: 10.88.1.0/24
+        - subnet: ${OPENBOT_SUBNET:-10.88.1.0/24}
 
 volumes:
   data:
