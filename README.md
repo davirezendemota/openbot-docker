@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://openbot.run"><img src="https://openbot.run/icon-512x512.png" alt="OpenBot" width="88" height="88"></a>
+  &nbsp;&nbsp;×&nbsp;&nbsp;
+  <a href="https://www.docker.com/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker" width="88" height="88"></a>
+</p>
+
 # openbot-docker
 
 Docker Compose and host firewall recipes to run one or more **isolated** [OpenBot](https://openbot.run/) servers ([nightly-labs/openbot](https://github.com/nightly-labs/openbot)). Each container is the security boundary: full agent access inside, no host bind mounts, no published ports, dedicated bridge network with ICC disabled.
