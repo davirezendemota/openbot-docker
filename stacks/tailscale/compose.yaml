@@ -1,0 +1,71 @@
+# Optional: OpenBot + Tailscale in-container. No published ports.
+# cp .env.example .env  →  docker compose up -d --build
+
+name: openbot-tailscale
+
+services:
+  openbot:
+    build:
+      context: ../../image
+      dockerfile: Dockerfile
+      args:
+        OPENBOT_IMAGE: ${OPENBOT_IMAGE:-ghcr.io/nightly-labs/openbot:0.57.0@sha256:84aadc0ce11beeadabfa1f17e4cc4d56bc27ed45f3ff9f3dbf7a6b3fe03471ef}
+        TAILSCALE_IMAGE: ${OPENBOT_TAILSCALE_IMAGE:-tailscale/tailscale:stable@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c}
+    image: openbot-docker:tailscale
+    container_name: ${OPENBOT_CONTAINER_NAME:-openbot-tailscale}
+    restart: unless-stopped
+    hostname: ${TS_HOSTNAME:-openbot-tailscale}
+    environment:
+      OPENBOT_TAILSCALE_AUTHKEY: ${OPENBOT_TAILSCALE_AUTHKEY:?set OPENBOT_TAILSCALE_AUTHKEY in .env}
+      TS_HOSTNAME: ${TS_HOSTNAME:-openbot-tailscale}
+    networks:
+      - isolated
+    dns:
+      - 1.1.1.1
+      - 9.9.9.9
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    security_opt:
+      - seccomp=../../seccomp.json
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+      - SYS_CHROOT
+      - SETUID
+      - SETGID
+    shm_size: 1g
+    stop_grace_period: 60s
+    mem_limit: ${OPENBOT_MEM_LIMIT:-6g}
+    cpus: ${OPENBOT_CPUS:-4}
+    pids_limit: 2048
+    volumes:
+      - openbot_data:/data
+      - tailscale_state:/var/lib/tailscale
+    healthcheck:
+      test: ["CMD", "tailscale", "status", "--json"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  isolated:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: ${OPENBOT_BRIDGE_NAME:-br-openbot-ts}
+      com.docker.network.bridge.enable_icc: "false"
+    ipam:
+      config:
+        - subnet: 10.88.2.0/24
+
+volumes:
+  openbot_data:
+  tailscale_state:

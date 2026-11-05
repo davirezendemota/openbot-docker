@@ -1,8 +1,10 @@
-# Setup with Tailscale
+# Setup with Tailscale (optional)
 
-Run OpenBot in a custom image that starts **tailscaled** inside the container, then OpenBot. The node registers on your tailnet with the hostname you set in `.env`. Use this when you want Tailscale ACLs to govern what the agent can reach on `100.x` peers, or when tuning remote browser latency with selective UDP egress on the host.
+**Optional add-on.** Complete the [generic setup](setup-generic.md) first unless you only want Tailscale (you can skip the root stack and run this directory alone).
 
-Stack files: root `compose.yaml`, `image/Dockerfile`, `image/entrypoint.sh`.
+This stack builds a custom image that starts **tailscaled** inside the container, then OpenBot. The node registers on your tailnet with the hostname you set in `.env`. Use it when you want Tailscale ACLs to govern what the agent can reach on `100.x` peers, or when tuning remote browser latency with selective UDP egress on the host.
+
+Stack: `stacks/tailscale/compose.yaml`, `image/Dockerfile`, `image/entrypoint.sh`.
 
 ## 1. Tailscale admin
 
@@ -16,13 +18,13 @@ The container calls `tailscale up` with `--accept-routes=false` and `--accept-dn
 
 Complete the shared steps in [SETUP.md](../SETUP.md#before-you-start).
 
-For this stack, set in `/etc/openbot-docker/firewall.conf`:
+Add the Tailscale stack bridge (default `br-openbot-ts`) to `/etc/openbot-docker/firewall.conf`:
 
 ```bash
-OPENBOT_FIREWALL_BRIDGES="br-openbot-1"
+OPENBOT_FIREWALL_BRIDGES="br-openbot-1 br-openbot-ts"
 ```
 
-Use the same bridge name as `OPENBOT_BRIDGE_NAME` in `.env` (default `br-openbot-1`).
+Include `br-openbot-1` only if you also run the root generic stack. Match `OPENBOT_BRIDGE_NAME` in `stacks/tailscale/.env`.
 
 ### Optional: faster remote browser over Tailscale
 
@@ -42,9 +44,8 @@ Only add IPs you trust. TCP to tailnet peers stays blocked by the bridge egress 
 
 ## 3. Environment
 
-From the repository root:
-
 ```bash
+cd stacks/tailscale
 cp .env.example .env
 ```
 
@@ -52,8 +53,8 @@ cp .env.example .env
 |----------|---------|
 | `OPENBOT_TAILSCALE_AUTHKEY` | Auth key from step 1 (required) |
 | `TS_HOSTNAME` | Tailscale node name |
-| `OPENBOT_BRIDGE_NAME` | Docker bridge (`br-openbot-1`) |
-| `OPENBOT_IMAGE` | Pinned upstream OpenBot image digest |
+| `OPENBOT_BRIDGE_NAME` | Docker bridge (`br-openbot-ts`) |
+| `OPENBOT_IMAGE` | Pinned upstream OpenBot image digest (build arg) |
 | `OPENBOT_TAILSCALE_IMAGE` | Pinned Tailscale image digest |
 | `OPENBOT_MEM_LIMIT` / `OPENBOT_CPUS` | Resource limits |
 
@@ -96,10 +97,10 @@ sudo journalctl -k -g openbot-drop --since -10min
 
 ## 7. Second Tailscale instance
 
-Duplicate the root project into a new directory (or copy `compose.yaml` + `image/` + `.env` with a new `COMPOSE_PROJECT_NAME`), then assign:
+Copy `stacks/tailscale` to a new directory, then assign:
 
-- New `TS_HOSTNAME`, bridge name, subnet in `networks.isolated.ipam`
-- New volume names (Compose project prefix handles this if `COMPOSE_PROJECT_NAME` differs)
+- New `TS_HOSTNAME`, bridge name, subnet in `compose.yaml`
+- New `COMPOSE_PROJECT_NAME` in `.env`
 - Append the new bridge to `OPENBOT_FIREWALL_BRIDGES`
 
 Run `openbot login` again for the new container.

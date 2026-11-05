@@ -4,13 +4,13 @@ Step-by-step guides for running isolated OpenBot containers on a Linux host with
 
 ## Before you start
 
-Both paths share the same **host firewall**. Install it once and list every Docker bridge you will use for OpenBot stacks.
+All stacks share the same **host firewall**. Install it once and list every Docker bridge you will use for OpenBot.
 
 ```bash
 sudo install -d /etc/openbot-docker
 sudo cp host/firewall.conf.example /etc/openbot-docker/firewall.conf
 # Edit OPENBOT_FIREWALL_BRIDGES (space-separated bridge names)
-# Optional: OPENBOT_FIREWALL_ALLOW_UDP for Tailscale WebRTC (see Tailscale guide)
+# Optional: OPENBOT_FIREWALL_ALLOW_UDP only if you use the Tailscale stack (see below)
 sudo install -d /usr/local/lib/openbot-docker
 sudo install -m 755 host/firewall.sh /usr/local/lib/openbot-docker/firewall.sh
 sudo install -m 644 host/openbot-firewall.service /etc/systemd/system/
@@ -24,14 +24,32 @@ Requirements:
 - Enough RAM for OpenBot (several GiB per active agent; set `OPENBOT_MEM_LIMIT` in `.env`)
 - Outbound internet from the container (account service, providers, TURN)
 
-## Choose a setup path
+## Default installation (no Tailscale)
 
-| Guide | When to use |
-|-------|-------------|
-| [docs/setup-tailscale.md](docs/setup-tailscale.md) | Remote browser over Tailscale, tailnet ACLs, or UDP allowlist for low-latency WebRTC |
-| [docs/setup-generic.md](docs/setup-generic.md) | Standard upstream OpenBot image only; no Tailscale inside the container |
+Start here. Root **`compose.yaml`** runs the pinned **upstream** OpenBot image with isolation defaults (bridge, seccomp, host firewall).
 
-Root `compose.yaml` implements the Tailscale path. The generic path uses `stacks/plain/compose.yaml` (copy the directory to add more instances).
+**Guide:** [docs/setup-generic.md](docs/setup-generic.md)
+
+```bash
+cp .env.example .env
+docker compose up -d
+docker compose exec openbot openbot login
+```
+
+## Optional: Tailscale inside the container
+
+Add this **only if** you need a tailnet node, ACL-controlled access to `100.x` peers, or host UDP tuning for remote browser WebRTC.
+
+**Guide:** [docs/setup-tailscale.md](docs/setup-tailscale.md)
+
+```bash
+cd stacks/tailscale
+cp .env.example .env
+# set OPENBOT_TAILSCALE_AUTHKEY, append br-openbot-ts to OPENBOT_FIREWALL_BRIDGES
+docker compose up -d --build
+```
+
+You can run the default stack and the Tailscale stack on the same host (separate bridges/subnets/volumes) or use Tailscale alone.
 
 ## After installation
 

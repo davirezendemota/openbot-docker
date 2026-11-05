@@ -2,7 +2,7 @@
 
 Public repository: Docker Compose + host firewall for **isolated self-hosted OpenBot** containers. Not tied to any other monorepo or deployment; clone and run on a Linux host with Docker.
 
-**Installation:** [SETUP.md](SETUP.md) (entry point) → [docs/setup-tailscale.md](docs/setup-tailscale.md) or [docs/setup-generic.md](docs/setup-generic.md).
+**Installation:** [SETUP.md](SETUP.md) — default [docs/setup-generic.md](docs/setup-generic.md); optional [docs/setup-tailscale.md](docs/setup-tailscale.md).
 
 ## What this repo is
 
@@ -17,8 +17,7 @@ Public repository: Docker Compose + host firewall for **isolated self-hosted Ope
         |                                    ^
         | WebRTC / account                   |
         v                                    |
-[ tailnet optional ]                  [ container ]
-        |                             tailscaled + OpenBot
+[ tailnet optional — stacks/tailscale/ ]   [ container: OpenBot or tailscaled+OpenBot ]
         |                             volume: /data
         v
 [ host: docker bridge br-openbot-N ]
@@ -33,17 +32,18 @@ Public repository: Docker Compose + host firewall for **isolated self-hosted Ope
 
 | File | Notes |
 |------|--------|
-| `compose.yaml` | Tailscale-enabled build; env `OPENBOT_TAILSCALE_AUTHKEY`, `TS_HOSTNAME`, `OPENBOT_BRIDGE_NAME` |
-| `image/Dockerfile` | Multi-stage: copy `tailscale`/`tailscaled` into upstream OpenBot image |
+| `compose.yaml` | Default upstream image; env `OPENBOT_BRIDGE_NAME`, `OPENBOT_IMAGE` |
+| `stacks/tailscale/compose.yaml` | Optional Tailscale build; env `OPENBOT_TAILSCALE_AUTHKEY`, `TS_HOSTNAME` |
+| `image/Dockerfile` | Used only by `stacks/tailscale/` — Tailscale binaries + upstream OpenBot |
 | `image/entrypoint.sh` | Starts `tailscaled`, `tailscale up`, then `openbot-container` as UID `openbot` |
 | `host/firewall.sh` | Idempotent iptables; config `/etc/openbot-docker/firewall.conf` or `host/firewall.conf` |
-| `stacks/plain/` | Separate compose project: upstream image only, different subnet/bridge |
+| `stacks/plain/` | Copy-paste template for an extra generic instance |
 
 ## Conventions
 
 - **Bridge names** must match between Compose `com.docker.network.bridge.name` and `OPENBOT_FIREWALL_BRIDGES`.
 - **Secrets:** only in `.env` (gitignored); never commit auth keys.
-- **Upgrades:** bump digest in `.env`, sync `seccomp.json` from upstream when needed, rebuild image stack.
+- **Upgrades:** bump digest in `.env`; for Tailscale stack rebuild `stacks/tailscale`; sync `seccomp.json` from upstream when needed.
 - **Commits:** Conventional Commits in English; keep firewall and compose changes reviewable separately when possible.
 
 ## Agent workflow hints
@@ -56,7 +56,7 @@ Public repository: Docker Compose + host firewall for **isolated self-hosted Ope
 ## Links
 
 - [SETUP.md](SETUP.md) — shared firewall prerequisites and links to setup guides
-- [docs/setup-tailscale.md](docs/setup-tailscale.md) — Tailscale-in-container stack
-- [docs/setup-generic.md](docs/setup-generic.md) — upstream image stack (`stacks/plain/`)
+- [docs/setup-generic.md](docs/setup-generic.md) — default root stack
+- [docs/setup-tailscale.md](docs/setup-tailscale.md) — optional `stacks/tailscale/`
 - OpenBot upstream Docker docs: https://github.com/nightly-labs/openbot (`docs/docker.md`)
 - [README.md](README.md) — layout, isolation model, upgrade, multi-instance checklist

@@ -1,11 +1,5 @@
-# Additional instance template
+# Second generic instance
 
-Copy this directory to a new name (e.g. `stacks/work/`) and adjust:
+Copy this directory when you need **another** upstream OpenBot host (no Tailscale). The default first instance lives at the **repository root** — see [docs/setup-generic.md](../../docs/setup-generic.md).
 
-1. `.env` — unique `OPENBOT_CONTAINER_NAME`, `OPENBOT_HOSTNAME`, `OPENBOT_BRIDGE_NAME`, `OPENBOT_VOLUME_NAME`, subnet in `compose.yaml`.
-2. `host/firewall.conf` — append the new bridge to `OPENBOT_FIREWALL_BRIDGES`, reload firewall.
-3. Run from that directory: `docker compose up -d`.
-
-Each instance is a separate Remote host in the OpenBot app (`openbot login` per container).
-
-For Tailscale inside the container, use the root `compose.yaml` pattern (build from `image/`) once per instance with its own project directory and bridge name.
+For Tailscale, use [stacks/tailscale/](../tailscale/) instead of duplicating this folder.

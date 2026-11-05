@@ -14,21 +14,22 @@ Upstream license: PolyForm Noncommercial 1.0.0 (personal use OK; commercial use 
 
 | Path | Purpose |
 |------|---------|
-| `compose.yaml` | Primary stack: custom image (`image/`) with Tailscale + OpenBot |
-| `image/` | Dockerfile and entrypoint (`tailscaled` then OpenBot as user `openbot`) |
+| `compose.yaml` | **Default** stack: upstream OpenBot image (no Tailscale) |
+| `stacks/tailscale/` | **Optional** custom image with Tailscale + OpenBot |
+| `image/` | Dockerfile and entrypoint for the Tailscale stack only |
 | `seccomp.json` | OpenBot upstream seccomp profile (Electron sandbox) |
 | `host/` | iptables egress filter for Docker bridge interfaces |
-| `stacks/plain/` | Optional second instance using the upstream image only (no Tailscale) |
-| `SETUP.md` | Setup entry point (host firewall + links to guides) |
-| `docs/setup-tailscale.md` | Tailscale-in-container installation |
-| `docs/setup-generic.md` | Upstream-image installation (`stacks/plain/`) |
+| `stacks/plain/` | Template for a second generic instance (different bridge/subnet) |
+| `SETUP.md` | Setup entry point (host firewall + default vs optional Tailscale) |
+| `docs/setup-generic.md` | Default installation at repo root |
+| `docs/setup-tailscale.md` | Optional Tailscale stack |
 
 ## Setup
 
-Follow **[SETUP.md](SETUP.md)** for host firewall prerequisites, then:
+Follow **[SETUP.md](SETUP.md)**:
 
-- **[docs/setup-tailscale.md](docs/setup-tailscale.md)** — root `compose.yaml` + Tailscale
-- **[docs/setup-generic.md](docs/setup-generic.md)** — generic upstream stack
+1. **[docs/setup-generic.md](docs/setup-generic.md)** — default (`cp .env.example .env` → `docker compose up -d`)
+2. **[docs/setup-tailscale.md](docs/setup-tailscale.md)** — optional (`stacks/tailscale/`)
 
 ## Isolation model
 
@@ -62,7 +63,7 @@ OpenBot does not downgrade data. Back up the `openbot_data` volume before upgrad
 
 1. Pull new tag, verify attestation: `gh attestation verify oci://ghcr.io/nightly-labs/openbot@<digest> --repo nightly-labs/openbot`
 2. Refresh `seccomp.json` from the same upstream tag if it changed.
-3. Update `OPENBOT_IMAGE` in `.env`, `docker compose build --no-cache && docker compose up -d`.
+3. Update `OPENBOT_IMAGE` in `.env`, then `docker compose up -d` (root) or `docker compose build --no-cache && docker compose up -d` in `stacks/tailscale/` if you use Tailscale.
 
 ## Multiple instances checklist
 
