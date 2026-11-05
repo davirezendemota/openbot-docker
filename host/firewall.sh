@@ -4,7 +4,7 @@
 # Public internet egress remains allowed (OpenBot account service, providers, TURN).
 #
 # Usage:
-#   sudo ./host/firewall.sh [up|down|status]
+#   sudo ./host/firewall.sh [up|down|status|check]
 #
 # Configure bridges and optional UDP allowlist via host/firewall.conf (copy from firewall.conf.example)
 # or environment variables OPENBOT_FIREWALL_BRIDGES / OPENBOT_FIREWALL_ALLOW_UDP.
@@ -75,9 +75,22 @@ status() {
   iptables -L OPENBOT-DROP -nv 2>/dev/null || true
 }
 
+# Exit non-zero if any configured bridge lacks its egress rules.
+check() {
+  local rc=0
+  for br in "${BRIDGES[@]}"; do
+    [[ -z "${br}" ]] && continue
+    iptables -C INPUT -i "$br" -j OPENBOT-DROP 2>/dev/null || { echo "MISSING: INPUT rule for $br" >&2; rc=1; }
+    iptables -C DOCKER-USER -i "$br" -j OPENBOT-EGRESS 2>/dev/null || { echo "MISSING: DOCKER-USER rule for $br" >&2; rc=1; }
+  done
+  [[ $rc -eq 0 ]] && echo "OK: firewall active for ${BRIDGES[*]}"
+  return $rc
+}
+
 case "${1:-up}" in
   up) up ;;
   down) down ;;
   status) status ;;
-  *) echo "usage: $0 [up|down|status]" >&2; exit 2 ;;
+  check) check ;;
+  *) echo "usage: $0 [up|down|status|check]" >&2; exit 2 ;;
 esac
