@@ -8,7 +8,7 @@
 
 Docker Compose and host firewall recipes to run one or more **isolated** [OpenBot](https://openbot.run/) servers ([nightly-labs/openbot](https://github.com/nightly-labs/openbot)). Each container is the security boundary: full agent access inside, no host bind mounts, no published ports, dedicated bridge network with ICC disabled.
 
-Upstream license: PolyForm Noncommercial 1.0.0 (personal use OK; commercial use requires a license from the OpenBot authors).
+This repository is licensed under [MIT](LICENSE). The upstream OpenBot image is a separate work under PolyForm Noncommercial 1.0.0 (personal use OK; commercial use requires a license from the OpenBot authors).
 
 ## Quick start
 
