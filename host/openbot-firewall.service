@@ -1,8 +1,8 @@
-# Install (adjust OPENBOT_DOCKER_ROOT):
-#   sudo install -d /etc/openbot-docker
+# Install (see SETUP.md):
+#   sudo install -d /etc/openbot-docker /usr/local/lib/openbot-docker
 #   sudo cp host/firewall.conf.example /etc/openbot-docker/firewall.conf
 #   sudo install -m 755 host/firewall.sh /usr/local/lib/openbot-docker/firewall.sh
-#   sudo sed "s|@OPENBOT_DOCKER_ROOT@|$(pwd)|g" host/openbot-firewall.service | sudo tee /etc/systemd/system/openbot-firewall.service
+#   sudo install -m 644 host/openbot-firewall.service /etc/systemd/system/
 #   sudo systemctl daemon-reload && sudo systemctl enable --now openbot-firewall
 [Unit]
 Description=iptables egress rules for isolated OpenBot Docker bridges
